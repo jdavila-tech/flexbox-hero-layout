@@ -1,0 +1,52 @@
+*{
+    margin: 0;
+    font-family: "Inter", sans-serif;
+}
+
+nav{
+    display: flex;
+    justify-content: space-evenly;
+    background-color: black;
+    color: gainsboro;
+    align-items: center;
+    height: 100px;
+}
+
+ul{
+    display: flex;
+    display: flex;
+    gap: 24px;
+}
+
+li{
+    list-style-type: none;
+}
+main{
+    display: flex;
+    justify-content: space-evenly;
+}
+section{
+    padding-top: 20px;
+    background-color: ;
+    width: 80%;
+    min-height: 400px;
+    padding: 40px 40px 40px 160px;
+ 
+}
+.hero-image{
+    padding-top: 20px;
+    background-color: ;
+    width: 100%;
+    min-height: 400px;
+}
+p{
+    margin-top: 10px;
+}
+.logomain{
+
+  font-family: "Bungee", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+
+
+}
