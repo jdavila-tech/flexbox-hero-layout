@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Job Listings</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="page-header">
+    <h1>Job Listings</h1>
+    <p>{{ job_count }} job{{ 's' if job_count != 1 else '' }} found &middot;
+       estimates assume 4&ndash;5 hrs/day, 10 workdays/2 weeks, after an estimated tax rate</p>
+  </header>
+
+  {% if errors %}
+    <div class="errors">
+      {% for err in errors %}
+        <p>Couldn't load a source: {{ err }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <main class="job-grid">
+    {% for job in jobs %}
+      <article class="job-card">
+        <div class="job-card-body">
+          <h2 class="job-title">{{ job.title }}</h2>
+          <p class="job-company">{{ job.company }}</p>
+          <p class="job-location">{{ job.location }}</p>
+          <p class="job-source">via {{ job.source }}</p>
+
+          {% if job.pay %}
+            <p class="job-pay">Pay: {{ job.pay }}</p>
+          {% endif %}
+
+          {% if job.estimate %}
+            <div class="job-estimate">
+              <p class="estimate-label">Est. bi-weekly (after ~{{ (job.estimate.tax_rate * 100) | round | int }}% tax)</p>
+              <p class="estimate-amount">
+                ${{ "%.2f"|format(job.estimate.net_low) }} &ndash; ${{ "%.2f"|format(job.estimate.net_high) }}
+              </p>
+            </div>
+          {% endif %}
+        </div>
+
+        {% if job.link %}
+          <a class="apply-link" href="{{ job.link }}" target="_blank" rel="noopener noreferrer">Apply</a>
+        {% endif %}
+      </article>
+    {% else %}
+      <p class="empty-state">No jobs found yet.</p>
+    {% endfor %}
+  </main>
+</body>
+</html>
