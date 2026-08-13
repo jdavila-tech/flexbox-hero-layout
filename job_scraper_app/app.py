@@ -33,6 +33,7 @@ def index():
             errors.append(f"{source['name']}: {exc}")
 
     jobs = [enrich_with_pay_estimate(job) for job in jobs]
+    jobs.sort(key=lambda job: job["estimate"] is None)  # priced jobs first
     return render_template("index.html", jobs=jobs, errors=errors, job_count=len(jobs))
 
 

@@ -31,6 +31,8 @@
 
           {% if job.pay %}
             <p class="job-pay">Pay: {{ job.pay }}</p>
+          {% else %}
+            <p class="job-pay job-pay-missing">Pay not listed by employer</p>
           {% endif %}
 
           {% if job.estimate %}
