@@ -27,8 +27,11 @@
 
   <main class="job-grid">
     {% for job in jobs %}
-      <article class="job-card">
+      <article class="job-card{{ ' viewed' if job.viewed else '' }}">
         <div class="job-card-body">
+          {% if job.viewed %}
+            <span class="viewed-badge">Viewed</span>
+          {% endif %}
           <h2 class="job-title">{{ job.title }}</h2>
           <p class="job-company">{{ job.company }}</p>
           <p class="job-location">{{ job.location }}</p>
@@ -60,7 +63,7 @@
         </div>
 
         {% if job.link %}
-          <a class="apply-link" href="{{ job.link }}" target="_blank" rel="noopener noreferrer">Apply</a>
+          <a class="apply-link" href="{{ url_for('go', job_id=job.id) }}" target="_blank" rel="noopener noreferrer">Apply</a>
         {% endif %}
       </article>
     {% else %}

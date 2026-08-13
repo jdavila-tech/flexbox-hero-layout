@@ -9,6 +9,7 @@ selectors for a job source dict, and append it to HTML_SOURCES — no code
 changes needed. Always check the target site's robots.txt / terms of
 service before adding it.
 """
+import hashlib
 import time
 
 import requests
@@ -42,6 +43,7 @@ def scrape_remoteok_api(url="https://remoteok.com/api"):
         if not salary_text and (entry.get("salary_min") or entry.get("salary_max")):
             salary_text = f"${entry.get('salary_min', '')}-${entry.get('salary_max', '')}/year"
         jobs.append({
+            "id": f"remoteok-{entry['id']}",
             "title": entry.get("position", "Untitled role"),
             "company": entry.get("company", "Unknown"),
             # RemoteOK's API has no reliable "is this actually remote" field —
@@ -77,6 +79,8 @@ def scrape_job_listings(source):
                 job["link"] = href
             else:
                 job[field] = el.get_text(strip=True) if el else ""
+        id_source = job.get("link") or f"{job.get('title', '')}|{job.get('company', '')}"
+        job["id"] = f"html-{hashlib.md5(id_source.encode()).hexdigest()[:12]}"
         jobs.append(job)
 
     time.sleep(source.get("delay", 1))

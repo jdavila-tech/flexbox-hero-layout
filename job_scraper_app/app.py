@@ -1,13 +1,21 @@
 import os
+import socket
 
-from flask import Flask, render_template
+from flask import Flask, abort, redirect, render_template
 
 from salary import estimate_biweekly_pay, estimate_biweekly_pay_range, parse_hourly_rate
 from scraper import scrape_job_listings, scrape_remoteok_api
 from sources import HTML_SOURCES
 from title_rates import estimate_hourly_range_from_title
+from viewed_store import get_viewed, mark_viewed
+
+DEFAULT_PORT = 8420  # distinctive default so it's less likely to collide with other local services
 
 app = Flask(__name__)
+
+# Maps job id -> real apply URL for whatever was scraped on the last page
+# load, so /go/<job_id> can redirect without trusting a client-supplied URL.
+_job_links = {}
 
 
 def enrich_with_pay_estimate(job):
@@ -42,9 +50,41 @@ def index():
 
     jobs = [enrich_with_pay_estimate(job) for job in jobs]
     jobs.sort(key=lambda job: job["estimate_source"] != "listed")  # employer-listed pay first
+
+    viewed_ids = get_viewed()
+    for job in jobs:
+        job["viewed"] = job["id"] in viewed_ids
+        if job.get("link"):
+            _job_links[job["id"]] = job["link"]
+
     return render_template("index.html", jobs=jobs, errors=errors, job_count=len(jobs))
 
 
+@app.route("/go/<job_id>")
+def go(job_id):
+    link = _job_links.get(job_id)
+    if not link:
+        abort(404)
+    mark_viewed(job_id)
+    return redirect(link)
+
+
+def find_available_port(preferred, host="0.0.0.0", max_tries=20):
+    port = preferred
+    for _ in range(max_tries):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            try:
+                s.bind((host, port))
+                return port
+            except OSError:
+                port += 1
+    raise RuntimeError(f"No available port found starting at {preferred}")
+
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
+    preferred_port = int(os.environ.get("PORT", DEFAULT_PORT))
+    port = find_available_port(preferred_port)
+    if port != preferred_port:
+        print(f"Port {preferred_port} was already in use; using {port} instead.")
     app.run(host="0.0.0.0", port=port)
