@@ -4,6 +4,7 @@ import socket
 from flask import Flask, abort, redirect, render_template
 
 from job_filters import matches_target_categories
+from platforms import get_platforms
 from salary import estimate_biweekly_pay, estimate_biweekly_pay_range, parse_hourly_rate
 from scraper import scrape_job_listings, scrape_remoteok_api
 from sources import HTML_SOURCES
@@ -63,6 +64,7 @@ def index():
     return render_template(
         "index.html", jobs=jobs, errors=errors,
         job_count=len(jobs), scraped_count=scraped_count,
+        platforms=get_platforms(),
     )
 
 

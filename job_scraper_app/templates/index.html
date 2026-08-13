@@ -79,5 +79,23 @@
       {% endif %}
     {% endfor %}
   </main>
+
+  <section class="platforms-section">
+    <h2>Where this kind of work is actually posted</h2>
+    <p class="platforms-note">
+      AI training, data annotation, transcription, and content moderation work is usually
+      handed out through a platform's own task queue rather than posted as individual job ads.
+      These links go to a search for each platform's name so you land on their current official
+      page, not a link guessed or scraped here.
+    </p>
+    <div class="platform-grid">
+      {% for platform in platforms %}
+        <a class="platform-card" href="{{ platform.search_url }}" target="_blank" rel="noopener noreferrer">
+          <span class="platform-name">{{ platform.name }}</span>
+          <span class="platform-description">{{ platform.description }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
 </body>
 </html>
