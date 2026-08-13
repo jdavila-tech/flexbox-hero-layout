@@ -6,7 +6,7 @@ from flask import Flask, abort, redirect, render_template
 from job_filters import matches_target_categories
 from platforms import get_platforms
 from salary import estimate_biweekly_pay, estimate_biweekly_pay_range, parse_hourly_rate
-from scraper import scrape_job_listings, scrape_remoteok_api
+from scraper import scrape_job_listings, scrape_remoteok_api, scrape_remotive_api
 from sources import HTML_SOURCES
 from title_rates import estimate_hourly_range_from_title
 from viewed_store import get_viewed, mark_viewed
@@ -43,6 +43,11 @@ def index():
         jobs.extend(scrape_remoteok_api())
     except Exception as exc:
         errors.append(f"RemoteOK: {exc}")
+
+    try:
+        jobs.extend(scrape_remotive_api())
+    except Exception as exc:
+        errors.append(f"Remotive: {exc}")
 
     for source in HTML_SOURCES:
         try:

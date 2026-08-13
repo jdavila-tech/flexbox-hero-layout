@@ -57,6 +57,30 @@ def scrape_remoteok_api(url="https://remoteok.com/api"):
     return jobs
 
 
+def scrape_remotive_api(url="https://remotive.com/api/remote-jobs"):
+    data = fetch(url).json()
+    entries = data.get("jobs", []) if isinstance(data, dict) else data
+    jobs = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        tags = [str(t).lower() for t in entry.get("tags") or []]
+        link = entry.get("url") or ""
+        entry_id = entry.get("id")
+        id_source = str(entry_id) if entry_id is not None else link
+        jobs.append({
+            "id": f"remotive-{hashlib.md5(str(id_source).encode()).hexdigest()[:12]}",
+            "title": entry.get("title", "Untitled role"),
+            "company": entry.get("company_name", "Unknown"),
+            "location": entry.get("candidate_required_location") or "Not specified",
+            "pay": entry.get("salary") or "",
+            "link": link,
+            "tags": tags,
+            "source": "Remotive",
+        })
+    return jobs
+
+
 def scrape_job_listings(source):
     """Generic CSS-selector-driven scraper for a single configured HTML source.
 
