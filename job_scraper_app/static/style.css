@@ -33,6 +33,12 @@ body {
   font-size: 0.9rem;
 }
 
+.disclaimer {
+  max-width: 620px;
+  margin: 0.5rem auto 0 !important;
+  font-size: 0.78rem !important;
+}
+
 .errors {
   max-width: 700px;
   margin: 0 auto 1rem;

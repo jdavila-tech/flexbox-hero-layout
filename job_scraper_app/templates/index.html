@@ -10,6 +10,11 @@
     <h1>Job Listings</h1>
     <p>{{ job_count }} job{{ 's' if job_count != 1 else '' }} found &middot;
        estimates assume 4&ndash;5 hrs/day, 10 workdays/2 weeks, after an estimated tax rate</p>
+    <p class="disclaimer">
+      Listings are pulled as-is from each source's feed &mdash; "remote" is not independently verified,
+      so check the full posting before applying. Pay figures with a dashed border are rough guesses,
+      not employer-provided.
+    </p>
   </header>
 
   {% if errors %}

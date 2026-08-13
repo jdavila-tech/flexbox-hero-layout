@@ -32,6 +32,9 @@ def scrape_remoteok_api(url="https://remoteok.com/api"):
     for entry in data:
         if not isinstance(entry, dict) or "id" not in entry:
             continue  # first element is a metadata/legal blob, not a job
+        tags = [str(t).lower() for t in entry.get("tags") or []]
+        if "testing" in tags:
+            continue  # RemoteOK includes dummy/test postings in the feed
         link = entry.get("url") or ""
         if link.startswith("/"):
             link = "https://remoteok.com" + link
@@ -41,7 +44,9 @@ def scrape_remoteok_api(url="https://remoteok.com/api"):
         jobs.append({
             "title": entry.get("position", "Untitled role"),
             "company": entry.get("company", "Unknown"),
-            "location": entry.get("location") or "Remote",
+            # RemoteOK's API has no reliable "is this actually remote" field —
+            # this is just whatever location text the listing itself provides.
+            "location": entry.get("location") or "Not specified",
             "pay": salary_text,
             "link": link,
             "source": "RemoteOK",
