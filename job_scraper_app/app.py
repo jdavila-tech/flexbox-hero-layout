@@ -49,6 +49,7 @@ def index():
         except Exception as exc:
             errors.append(f"{source['name']}: {exc}")
 
+    scraped_count = len(jobs)
     jobs = [job for job in jobs if matches_target_categories(job)]
     jobs = [enrich_with_pay_estimate(job) for job in jobs]
     jobs.sort(key=lambda job: job["estimate_source"] != "listed")  # employer-listed pay first
@@ -59,7 +60,10 @@ def index():
         if job.get("link"):
             _job_links[job["id"]] = job["link"]
 
-    return render_template("index.html", jobs=jobs, errors=errors, job_count=len(jobs))
+    return render_template(
+        "index.html", jobs=jobs, errors=errors,
+        job_count=len(jobs), scraped_count=scraped_count,
+    )
 
 
 @app.route("/go/<job_id>")

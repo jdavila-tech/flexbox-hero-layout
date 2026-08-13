@@ -9,8 +9,8 @@
   <header class="page-header">
     <h1>Job Listings</h1>
     <p class="category-focus">AI training &amp; data annotation &middot; data entry &amp; transcription &middot; content moderation</p>
-    <p>{{ job_count }} job{{ 's' if job_count != 1 else '' }} found &middot;
-       estimates assume 4&ndash;5 hrs/day, 10 workdays/2 weeks, after an estimated tax rate</p>
+    <p>{{ job_count }} job{{ 's' if job_count != 1 else '' }} matched out of {{ scraped_count }} scraped &middot;
+       pay estimates (not the job list) assume 4&ndash;5 hrs/day, 10 workdays/2 weeks, after an estimated tax rate</p>
     <p class="disclaimer">
       Listings are pulled as-is from each source's feed &mdash; "remote" is not independently verified,
       so check the full posting before applying. Pay figures with a dashed border are rough guesses,
@@ -68,7 +68,15 @@
         {% endif %}
       </article>
     {% else %}
-      <p class="empty-state">No jobs found yet.</p>
+      {% if scraped_count == 0 %}
+        <p class="empty-state">No listings came back from the source(s) at all this refresh &mdash; check the error banner above, or the source may just be temporarily empty. Try reloading.</p>
+      {% else %}
+        <p class="empty-state">
+          {{ scraped_count }} job{{ 's' if scraped_count != 1 else '' }} were scraped, but none matched the target
+          categories (AI training/annotation, data entry, transcription, content moderation) this refresh.
+          That's a narrow slice of RemoteOK's board &mdash; try reloading later, or add more specialized sources.
+        </p>
+      {% endif %}
     {% endfor %}
   </main>
 </body>
