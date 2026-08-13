@@ -51,6 +51,7 @@ def scrape_remoteok_api(url="https://remoteok.com/api"):
             "location": entry.get("location") or "Not specified",
             "pay": salary_text,
             "link": link,
+            "tags": tags,
             "source": "RemoteOK",
         })
     return jobs

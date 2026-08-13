@@ -39,6 +39,12 @@ body {
   font-size: 0.78rem !important;
 }
 
+.category-focus {
+  margin: 0.35rem 0 0.5rem !important;
+  font-weight: 600;
+  color: var(--accent) !important;
+}
+
 .errors {
   max-width: 700px;
   margin: 0 auto 1rem;

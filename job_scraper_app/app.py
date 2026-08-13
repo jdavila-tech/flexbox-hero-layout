@@ -3,6 +3,7 @@ import socket
 
 from flask import Flask, abort, redirect, render_template
 
+from job_filters import matches_target_categories
 from salary import estimate_biweekly_pay, estimate_biweekly_pay_range, parse_hourly_rate
 from scraper import scrape_job_listings, scrape_remoteok_api
 from sources import HTML_SOURCES
@@ -48,6 +49,7 @@ def index():
         except Exception as exc:
             errors.append(f"{source['name']}: {exc}")
 
+    jobs = [job for job in jobs if matches_target_categories(job)]
     jobs = [enrich_with_pay_estimate(job) for job in jobs]
     jobs.sort(key=lambda job: job["estimate_source"] != "listed")  # employer-listed pay first
 

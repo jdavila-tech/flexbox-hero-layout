@@ -5,9 +5,27 @@ are general US ballpark ranges, not tailored to a specific listing's
 location, company, or seniority — always surfaced to the user as a guess,
 never presented as employer-provided pay.
 """
+from job_filters import is_ai_training_role
+
+AI_TRAINING_RATE = (16, 30)
 
 # Ordered most-specific first; the first keyword found in the title wins.
 TITLE_RATE_TABLE = [
+    # Flexible, low/no-interaction remote gig categories (checked first,
+    # since these are the roles job_filters.py restricts listings to).
+    ("rlhf", (18, 35)),
+    ("annotat", (15, 28)),
+    ("data label", (15, 25)),
+    ("data tagging", (14, 22)),
+    ("data entry", (14, 20)),
+    ("transcri", (15, 25)),
+    ("content moderat", (15, 22)),
+    ("chat moderat", (15, 22)),
+    ("engine evaluat", (14, 20)),
+    ("search quality", (14, 20)),
+    ("quality rater", (14, 20)),
+    ("ads quality", (14, 20)),
+
     ("software", (35, 75)),
     ("developer", (35, 75)),
     ("engineer", (32, 70)),
@@ -62,5 +80,8 @@ def estimate_hourly_range_from_title(title):
     for keyword, (low, high) in TITLE_RATE_TABLE:
         if keyword in lowered:
             return low, high, True
+    if is_ai_training_role(title):
+        low, high = AI_TRAINING_RATE
+        return low, high, True
     low, high = GENERIC_FALLBACK
     return low, high, False
