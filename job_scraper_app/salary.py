@@ -48,3 +48,18 @@ def estimate_biweekly_pay(hourly_rate, hours_low=4, hours_high=5,
         "net_high": round(gross_high * (1 - tax_rate), 2),
         "tax_rate": tax_rate,
     }
+
+
+def estimate_biweekly_pay_range(rate_low, rate_high, hours_low=4, hours_high=5,
+                                 workdays=WORKDAYS_PER_BIWEEK, tax_rate=DEFAULT_TAX_RATE):
+    """Same as estimate_biweekly_pay but for an hourly-rate *range* (e.g. a
+    title-based guess), widening across both the rate and hours uncertainty."""
+    gross_low = round(rate_low * hours_low * workdays, 2)
+    gross_high = round(rate_high * hours_high * workdays, 2)
+    return {
+        "gross_low": gross_low,
+        "gross_high": gross_high,
+        "net_low": round(gross_low * (1 - tax_rate), 2),
+        "net_high": round(gross_high * (1 - tax_rate), 2),
+        "tax_rate": tax_rate,
+    }

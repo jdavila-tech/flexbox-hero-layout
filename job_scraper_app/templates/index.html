@@ -35,9 +35,18 @@
             <p class="job-pay job-pay-missing">Pay not listed by employer</p>
           {% endif %}
 
-          {% if job.estimate %}
+          {% if job.estimate_source == "listed" %}
             <div class="job-estimate">
               <p class="estimate-label">Est. bi-weekly (after ~{{ (job.estimate.tax_rate * 100) | round | int }}% tax)</p>
+              <p class="estimate-amount">
+                ${{ "%.2f"|format(job.estimate.net_low) }} &ndash; ${{ "%.2f"|format(job.estimate.net_high) }}
+              </p>
+            </div>
+          {% else %}
+            <div class="job-estimate job-estimate-guess">
+              <p class="estimate-label">
+                Rough guess for this type of role (not employer-provided{{ ", no title match" if job.estimate_source == "guessed_generic" else "" }})
+              </p>
               <p class="estimate-amount">
                 ${{ "%.2f"|format(job.estimate.net_low) }} &ndash; ${{ "%.2f"|format(job.estimate.net_high) }}
               </p>

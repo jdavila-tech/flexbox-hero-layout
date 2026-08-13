@@ -99,6 +99,15 @@ body {
   border-radius: 8px;
 }
 
+.job-estimate-guess {
+  background: transparent;
+  border: 1px dashed var(--border);
+}
+
+.job-estimate-guess .estimate-amount {
+  color: var(--muted);
+}
+
 .estimate-label {
   margin: 0;
   font-size: 0.75rem;
