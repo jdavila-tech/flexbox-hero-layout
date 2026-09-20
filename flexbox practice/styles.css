@@ -14,7 +14,6 @@ nav{
 
 ul{
     display: flex;
-    display: flex;
     gap: 24px;
 }
 
@@ -27,17 +26,18 @@ main{
 }
 section{
     padding-top: 20px;
-    background-color: ;
-    width: 80%;
+    width: 50%;
     min-height: 400px;
     padding: 40px 40px 40px 160px;
- 
 }
 .hero-image{
     padding-top: 20px;
-    background-color: ;
-    width: 100%;
+    width: 50%;
     min-height: 400px;
+}
+.hero-image img{
+    max-width: 100%;
+    height: auto;
 }
 p{
     margin-top: 10px;
