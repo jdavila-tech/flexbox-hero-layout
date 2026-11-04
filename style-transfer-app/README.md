@@ -37,6 +37,8 @@ Keys can be added from the ⚙️ **Settings** button in the app. They're saved 
 | Variable | Default | Purpose |
 |---|---|---|
 | `PORT` | `4000` | Port the app listens on |
+| `HTTPS` | `false` | `true` serves HTTPS with an auto-generated self-signed cert |
+| `HTTPS_CERT` / `HTTPS_KEY` | none | Use your own certificate instead |
 | `ANTHROPIC_API_KEY` | none | Style extraction |
 | `IMAGE_PROVIDER` | auto | `gemini` or `openai` |
 | `GEMINI_API_KEY` / `OPENAI_API_KEY` | none | Image generation |
@@ -45,11 +47,26 @@ Keys can be added from the ⚙️ **Settings** button in the app. They're saved 
 | `OPENAI_IMAGE_MODEL` | `gpt-image-1` | OpenAI image model |
 | `ACCESS_CODE` | none | If set, visitors must enter this code (protects your API credits on a public server) |
 
+## Run it permanently (Raspberry Pi / Linux)
+
+```bash
+cd style-transfer-app
+./scripts/install-service.sh
+```
+
+This installs a `styleshift` systemd service. It runs in the background, keeps running after you close SSH, and starts on boot. It also turns on HTTPS.
+
+Open `https://<pi-ip>:4000` on your phone. The first time, the browser warns that the connection isn't private, because the certificate is self-signed. Tap **Advanced**, then **Proceed**.
+
+```bash
+sudo systemctl status styleshift     # is it running?
+sudo journalctl -u styleshift -f     # live logs
+sudo systemctl restart styleshift    # restart after git pull / .env changes
+```
+
 ## Using the camera from your phone
 
-Browsers only allow live camera access on `https://` pages or `localhost`. Options:
-- Put the app behind HTTPS (for example `npx localtunnel --port 4000`, `cloudflared tunnel --url http://localhost:4000`, or a reverse proxy with a certificate).
-- Over plain `http://`, the **Take photo** button falls back to your phone's native camera picker, which still lets you snap a photo.
+Browsers only allow live camera access on `https://` pages or `localhost`. Set `HTTPS=true` in `.env` (the installer does this). A self-signed certificate is generated in `./certs` automatically, or you can point `HTTPS_CERT` and `HTTPS_KEY` at your own. Over plain `http://`, **Take photo** falls back to the phone's native camera picker.
 
 If you expose the app to the internet, set `ACCESS_CODE` so strangers can't use your API keys.
 

@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import https from "node:https";
+import { startServer } from "./lib/listen.js";
 import { extractStyleJson } from "./lib/analyze.js";
 import { generateStyledImage, PROVIDERS } from "./lib/generate.js";
 
@@ -171,8 +173,9 @@ app.post(
   }),
 );
 
-app.listen(PORT, HOST, () => {
+startServer(app, { port: PORT, host: HOST, baseDir: __dirname, https }).then(({ urls }) => {
   const s = configStatus();
-  console.log(`\n  StyleShift running on http://localhost:${PORT}`);
+  console.log(`\n  StyleShift is running:`);
+  for (const u of urls) console.log(`    ${u}`);
   console.log(`  Claude key: ${s.anthropicKey ? "set" : "MISSING"} | Image provider: ${s.imageProviderLabel || "MISSING"}\n`);
 });
