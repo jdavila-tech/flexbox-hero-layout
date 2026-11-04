@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>StyleShift</title>
+  <meta name="description" content="Turn your photo into the style of any image you love." />
+  <meta name="theme-color" content="#0b0d12" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ff4d6d'/%3E%3Cstop offset='.5' stop-color='%23ffd23f'/%3E%3Cstop offset='1' stop-color='%233a86ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Cpath d='M20 40c8 6 24 4 24-6s-24-6-24-16 16-12 24-6' stroke='%230b0d12' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-splash" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="logo" aria-hidden="true"></span>
+      <span>StyleShift</span>
+    </a>
+    <button class="btn ghost icon-btn" id="settingsBtn" aria-label="Settings">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="dot" id="settingsDot" hidden></span>
+    </button>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>Become the <span class="grad">art you love</span></h1>
+      <p>Upload any picture whose style you like, add a photo of yourself, and StyleShift redraws you in that exact style.</p>
+    </section>
+
+    <div class="banner" id="setupBanner" hidden>
+      <div>
+        <strong>Finish setup</strong>
+        <span id="setupText">Add your API keys to start converting.</span>
+      </div>
+      <button class="btn small" id="setupBtn">Open Settings</button>
+    </div>
+
+    <ol class="stepper" aria-label="Progress">
+      <li data-step="1" class="active"><span>1</span><em>Inspiration</em></li>
+      <li data-step="2"><span>2</span><em>Your photo</em></li>
+      <li data-step="3"><span>3</span><em>Convert</em></li>
+    </ol>
+
+    <div class="grid">
+      <!-- STEP 1 -->
+      <section class="card" id="card1">
+        <header class="card-head">
+          <span class="num">1</span>
+          <div>
+            <h2>Inspiration image</h2>
+            <p>The look you want. Its style is extracted automatically.</p>
+          </div>
+        </header>
+
+        <div class="drop" id="drop1" tabindex="0" role="button" aria-label="Upload inspiration image">
+          <input type="file" id="file1" accept="image/*" hidden />
+          <div class="drop-empty">
+            <div class="drop-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
+            <strong>Drop an image or tap to upload</strong>
+            <small>JPG, PNG, WEBP · or paste from clipboard</small>
+          </div>
+          <img class="preview" id="preview1" alt="Inspiration preview" hidden />
+          <div class="scan" id="scan1" hidden><div class="scan-line"></div><span class="scan-label">Analyzing style…</span></div>
+        </div>
+
+        <form class="url-row" id="urlForm">
+          <input type="url" id="urlInput" placeholder="…or paste an image link" inputmode="url" />
+          <button class="btn small secondary" type="submit">Load</button>
+        </form>
+
+        <div class="status" id="status1" hidden></div>
+
+        <details class="json-panel" id="jsonPanel" hidden>
+          <summary>
+            <span>Style JSON</span>
+            <span class="pill" id="styleTitle"></span>
+          </summary>
+          <div class="json-tools">
+            <span class="hint">Edit to fine-tune the result</span>
+            <div>
+              <button class="btn tiny ghost" type="button" id="copyJson">Copy</button>
+              <button class="btn tiny ghost" type="button" id="resetJson">Reset</button>
+            </div>
+          </div>
+          <textarea id="jsonEditor" spellcheck="false" aria-label="Style JSON"></textarea>
+          <div class="json-error" id="jsonError" hidden></div>
+        </details>
+      </section>
+
+      <!-- STEP 2 -->
+      <section class="card" id="card2">
+        <header class="card-head">
+          <span class="num">2</span>
+          <div>
+            <h2>Your photo</h2>
+            <p>A clear, well-lit photo of your face works best.</p>
+          </div>
+        </header>
+
+        <div class="drop" id="drop2" tabindex="0" role="button" aria-label="Upload your photo">
+          <input type="file" id="file2" accept="image/*" hidden />
+          <input type="file" id="file2cam" accept="image/*" capture="user" hidden />
+          <div class="drop-empty">
+            <div class="drop-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></div>
+            <strong>Upload a photo of yourself</strong>
+            <small>or take one right now</small>
+          </div>
+          <img class="preview" id="preview2" alt="Your photo preview" hidden />
+        </div>
+
+        <div class="btn-row">
+          <button class="btn secondary" id="uploadBtn2" type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>
+            Upload
+          </button>
+          <button class="btn secondary" id="cameraBtn" type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Take photo
+          </button>
+        </div>
+
+        <div class="options">
+          <label class="toggle">
+            <input type="checkbox" id="optOutfit" checked />
+            <span class="switch"></span>
+            <span>Match outfit &amp; pose from inspiration</span>
+          </label>
+          <label class="toggle">
+            <input type="checkbox" id="optRef" checked />
+            <span class="switch"></span>
+            <span>Also send inspiration image as visual reference</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- STEP 3 -->
+      <section class="card card-wide" id="card3">
+        <header class="card-head">
+          <span class="num">3</span>
+          <div>
+            <h2>Convert</h2>
+            <p id="convertHint">Complete steps 1 and 2 to unlock.</p>
+          </div>
+        </header>
+
+        <button class="btn convert" id="convertBtn" disabled>
+          <span class="convert-label">Convert</span>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg>
+        </button>
+
+        <div class="progress" id="progress" hidden>
+          <div class="bar"><div class="fill"></div></div>
+          <p id="progressText">Painting your portrait…</p>
+        </div>
+
+        <div class="status" id="status3" hidden></div>
+
+        <div class="result" id="result" hidden>
+          <div class="compare">
+            <figure>
+              <img id="resultBefore" alt="Your original photo" />
+              <figcaption>Before</figcaption>
+            </figure>
+            <figure class="after">
+              <img id="resultAfter" alt="Styled result" />
+              <figcaption>After</figcaption>
+            </figure>
+          </div>
+          <div class="btn-row center">
+            <a class="btn" id="downloadBtn" download="styleshift.png">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+              Download
+            </a>
+            <button class="btn secondary" id="regenBtn">Regenerate</button>
+            <button class="btn ghost" id="restartBtn">Start over</button>
+          </div>
+          <p class="fine" id="providerNote"></p>
+        </div>
+      </section>
+    </div>
+
+    <footer class="foot">Photos are processed in memory and never stored on the server.</footer>
+  </main>
+
+  <!-- Camera modal -->
+  <dialog class="modal" id="cameraModal">
+    <div class="modal-body camera-body">
+      <div class="modal-head">
+        <h3>Take a photo</h3>
+        <button class="btn ghost icon-btn" data-close aria-label="Close">✕</button>
+      </div>
+      <div class="camera-frame">
+        <video id="video" playsinline autoplay muted></video>
+        <canvas id="snapCanvas" hidden></canvas>
+        <img id="snapPreview" alt="Captured photo" hidden />
+        <div class="face-guide" aria-hidden="true"></div>
+        <div class="countdown" id="countdown" hidden></div>
+      </div>
+      <p class="status error" id="cameraError" hidden></p>
+      <div class="btn-row center" id="camLive">
+        <button class="btn ghost" id="flipBtn" type="button">Flip</button>
+        <button class="shutter" id="shutterBtn" type="button" aria-label="Capture"></button>
+        <button class="btn ghost" id="timerBtn" type="button">3s timer</button>
+      </div>
+      <div class="btn-row center" id="camReview" hidden>
+        <button class="btn secondary" id="retakeBtn" type="button">Retake</button>
+        <button class="btn" id="usePhotoBtn" type="button">Use photo</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Settings modal -->
+  <dialog class="modal" id="settingsModal">
+    <form class="modal-body" id="settingsForm" method="dialog">
+      <div class="modal-head">
+        <h3>Settings</h3>
+        <button class="btn ghost icon-btn" data-close type="button" aria-label="Close">✕</button>
+      </div>
+      <p class="muted">Keys are saved to the server's <code>.env</code> file and never sent back to the browser.</p>
+
+      <label class="field" id="accessField" hidden>
+        <span>Access code</span>
+        <input type="password" id="accessCode" autocomplete="off" placeholder="Required by this server" />
+      </label>
+
+      <label class="field">
+        <span>Anthropic API key <em class="key-state" id="stateAnthropic"></em></span>
+        <input type="password" id="keyAnthropic" autocomplete="off" placeholder="sk-ant-…" />
+        <small>Used to read the inspiration image's style. <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Get a key</a></small>
+      </label>
+
+      <label class="field">
+        <span>Image generator</span>
+        <select id="providerSelect">
+          <option value="gemini">Google Gemini (recommended)</option>
+          <option value="openai">OpenAI gpt-image</option>
+        </select>
+      </label>
+
+      <label class="field" id="geminiField">
+        <span>Gemini API key <em class="key-state" id="stateGemini"></em></span>
+        <input type="password" id="keyGemini" autocomplete="off" placeholder="AIza…" />
+        <small>Free key from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a></small>
+      </label>
+
+      <label class="field" id="openaiField" hidden>
+        <span>OpenAI API key <em class="key-state" id="stateOpenai"></em></span>
+        <input type="password" id="keyOpenai" autocomplete="off" placeholder="sk-…" />
+        <small><a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">Get a key</a></small>
+      </label>
+
+      <div class="status" id="settingsStatus" hidden></div>
+      <div class="btn-row end">
+        <button class="btn ghost" data-close type="button">Cancel</button>
+        <button class="btn" type="submit" id="saveSettings">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
