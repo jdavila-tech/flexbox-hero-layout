@@ -39,7 +39,7 @@ def auth(creds: HTTPBasicCredentials = Depends(security)) -> None:
 async def lifespan(_app):
     jobs.start_worker()
     log.info("Movies: %s | TV: %s | Claude review: %s", SETTINGS.movies_dir, SETTINGS.tv_dir,
-             "on" if review.available() else "OFF (no API key)")
+             f"on via {review.model_label()}" if review.available() else f"OFF ({review.unavailable_reason()})")
     yield
 
 
@@ -70,7 +70,7 @@ def status():
     return {
         "movies_dir": str(SETTINGS.movies_dir), "movies_ok": SETTINGS.movies_dir.is_dir(),
         "tv_dir": str(SETTINGS.tv_dir), "tv_ok": SETTINGS.tv_dir.is_dir(),
-        "review": review.available(), "model": SETTINGS.review_model,
+        "review": review.available(), "model": review.model_label(), "review_off_reason": review.unavailable_reason(),
         "skip_categories": SETTINGS.skip_categories,
         "confidence_threshold": SETTINGS.confidence_threshold,
         "unreviewed_default": SETTINGS.unreviewed_default,

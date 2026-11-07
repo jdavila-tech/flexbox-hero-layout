@@ -206,7 +206,7 @@ def _scan(video: Path, work: Path, progress: Progress | None, should_stop: StopC
         img.thumbnail((360, 360))
         img.save(tdir / f"{seg['id']}.jpg", "JPEG", quality=75)
 
-        key = f"{stat.st_size}:{int(stat.st_mtime)}:{raw_start:.1f}:{raw_end:.1f}:{SETTINGS.review_model}"
+        key = f"{stat.st_size}:{int(stat.st_mtime)}:{raw_start:.1f}:{raw_end:.1f}:{review.model_label()}"
         if key in cache:
             seg["review"] = cache[key]
         elif use_claude:
@@ -220,7 +220,7 @@ def _scan(video: Path, work: Path, progress: Progress | None, should_stop: StopC
                 cache_file.write_text(json.dumps(cache))
         else:
             seg["review"] = {"category": "unclear", "confidence": 0.0,
-                             "reason_short": "Claude review is off (no API key)", "model": None}
+                             "reason_short": f"Not checked by Claude: {review.unavailable_reason()}", "model": None}
         segments.append(seg)
 
     old = skips.load(video)
@@ -231,7 +231,7 @@ def _scan(video: Path, work: Path, progress: Progress | None, should_stop: StopC
         "frames_checked": len(frames),
         "scene_cuts": len(cuts),
         "subtitles": subs_path.name if subs_path else None,
-        "review_model": SETTINGS.review_model if use_claude else None,
+        "review_model": review.model_label() if use_claude else None,
         "tokens": tokens,
         "edl_sha256": (old or {}).get("edl_sha256"),
         "segments": skips.carry_over_user_decisions(segments, old),

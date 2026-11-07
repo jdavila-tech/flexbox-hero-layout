@@ -10,7 +10,8 @@ How a title is processed:
    so very short shots aren't missed. A local detector (NudeNet) flags anything that *might* be nudity.
    It is set to flag too much on purpose. Dark frames are brightened first so dark scenes aren't missed.
 2. **Claude double-checks.** For each flagged scene, a few small frames (shrunk to 512 px) plus nearby
-   subtitle lines go to Claude. Claude labels it: real nudity, swimsuit or underwear, shirtless man,
+   subtitle lines go to Claude, through **Claude Code** (the `claude` command) signed in with your
+   **Claude subscription**. No API key is needed. Claude labels it: real nudity, swimsuit or underwear, shirtless man,
    statue or painting, medical, a baby's bath, a false alarm, and so on. Only the categories you choose
    are skipped. If Claude isn't sure, the scene waits for your review.
 3. **Clean edges.** The start and end of each scene are checked again at 5 frames per second, then moved
@@ -34,20 +35,36 @@ Needs Docker with the compose plugin.
 ```bash
 cd plex-skip-scanner
 cp .env.example .env
-nano .env            # set the password, API key, your Plex folder paths, PUID/PGID
+nano .env            # set the password, your Plex folder paths, PUID/PGID (token comes next)
 mkdir -p data
 docker compose up -d --build
 ```
 
 Open **http://SERVER-IP:6091** and sign in as `admin` with the password from `.env`.
 
+### Sign Claude in (once)
+
+The app runs Claude Code with your Claude subscription. Create a long-lived sign-in token:
+
+```bash
+claude setup-token        # on the server; opens a sign-in link, then prints a token
+```
+
+Don't have `claude` on the server yet? Use the copy inside the container instead:
+`docker compose exec skip-scanner claude setup-token`.
+
+Put the token in `.env` as `CLAUDE_CODE_OAUTH_TOKEN=...` and run `docker compose up -d`. The badge
+at the top of the page should then say **Claude review on**. Keep `.env` private: the token
+signs in as you.
+
 - **PUID/PGID:** run `id` on the server as the user who owns the media files. The app needs write access
   to the media folders to save the skip files next to the videos.
-- **No API key?** The app still works, but every flagged scene waits for your review instead of
-  being sorted by Claude.
-- **Cost:** only flagged scenes are sent, about 6 small frames each. A typical movie costs a few cents
-  to tens of cents. Each title's `.skips.json` records the tokens used. Results are cached, so scanning
-  again doesn't pay twice.
+- **Not signed in yet?** The app still works, but every flagged scene waits for your review instead
+  of being sorted by Claude.
+- **Usage:** each flagged scene is one short Claude Code request (about 6 seconds, 6 small frames).
+  It counts toward your subscription's usage limits like any other Claude use. A movie usually has
+  0–30 flagged scenes. If you hit your limit, the remaining scenes are marked "needs review"; scan the
+  title again later. Results are cached, so a rescan only asks about new scenes.
 - **Privacy:** only the small frames of *flagged* scenes and nearby subtitle lines leave the server.
   Full videos never do.
 - **Speed:** a 2-hour movie takes roughly 10–30 minutes on a typical home-server processor. Titles are
@@ -75,7 +92,8 @@ Open **http://SERVER-IP:6091** and sign in as `admin` with the password from `.e
 | `decisions.confidence_threshold` | Below this (0–1), a scene waits for your review. |
 | `decisions.unreviewed_default` | `skip` or `keep` for scenes still waiting for review. |
 | `detection.threshold` | Detector sensitivity. Lower flags more (and costs more to review). |
-| `review.model` | Claude model used for review. |
+| `review.claude_code_model` | `sonnet` or `opus` to choose the model; empty uses your account's default. |
+| `review.backend` | `claude_code` (default, your subscription) or `api` (an API key, if you ever get one). |
 | `skips.padding_sec`, `snap_to_cut_sec`, `merge_gap_sec` | How skips are shaped. |
 
 Restart after changing it: `docker compose restart`.
@@ -94,6 +112,7 @@ python3 -m venv venv && . venv/bin/activate
 pip install -r requirements.txt     # also needs ffmpeg installed
 MOVIES_DIR=/path/Movies TV_DIR=/path/TV DATA_DIR=./data CONFIG_PATH=./config.yaml \
 APP_PASSWORD=secret uvicorn app.main:app --host 0.0.0.0 --port 6091
+# uses the `claude` command already signed in on this machine
 ```
 
 ## Limits

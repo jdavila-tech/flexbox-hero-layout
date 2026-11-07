@@ -15,13 +15,18 @@ detection:
     - ANUS_EXPOSED
 
 review:
-  enabled: true            # needs ANTHROPIC_API_KEY in .env
-  model: claude-opus-5-5
-  effort: low              # low is plenty for a yes/no style label and keeps cost down
-  use_fallbacks: true      # if the model declines, the API retries on another Claude model
+  enabled: true
+  # claude_code = the `claude` command signed in with your Claude subscription (no API key)
+  # api         = Anthropic API key (ANTHROPIC_API_KEY), billed per use
+  backend: claude_code
+  claude_code_model: ""     # e.g. sonnet or opus; empty = your account's default
+  claude_code_timeout: 240  # seconds per scene before giving up
+  model: claude-opus-5-5    # only used with backend: api
+  effort: low               # only used with backend: api
+  use_fallbacks: true       # only used with backend: api
   frames_per_segment: 6
-  frame_max_px: 512        # frames are shrunk to this size before being sent
-  subtitle_window_sec: 30  # subtitle lines from this far around the scene are included
+  frame_max_px: 512         # frames are shrunk to this size before Claude sees them
+  subtitle_window_sec: 30   # subtitle lines from this far around the scene are included
 
 decisions:
   skip:                    # categories that get skipped

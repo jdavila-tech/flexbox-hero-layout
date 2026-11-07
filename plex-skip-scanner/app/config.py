@@ -37,6 +37,9 @@ class Settings:
     brighten_dark_frames: bool = True
     # review
     review_enabled: bool = True
+    review_backend: str = "claude_code"  # claude_code | api
+    claude_code_model: str = ""          # e.g. "sonnet" or "opus"; empty = your account's default
+    claude_code_timeout: int = 240
     review_model: str = "claude-opus-5-5"
     review_effort: str = "low"
     use_fallbacks: bool = True
@@ -92,6 +95,9 @@ def load_settings() -> Settings:
         min_segment_sec=float(det.get("min_segment_sec", 0.5)),
         brighten_dark_frames=bool(det.get("brighten_dark_frames", True)),
         review_enabled=bool(rev.get("enabled", True)),
+        review_backend=str(rev.get("backend", "claude_code")),
+        claude_code_model=str(rev.get("claude_code_model", "") or ""),
+        claude_code_timeout=int(rev.get("claude_code_timeout", 240)),
         review_model=str(rev.get("model", "claude-opus-5-5")),
         review_effort=str(rev.get("effort", "low")),
         use_fallbacks=bool(rev.get("use_fallbacks", True)),

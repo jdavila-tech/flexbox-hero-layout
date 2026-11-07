@@ -6,6 +6,10 @@ import io
 import json
 import logging
 import os
+import re
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 
 import anthropic
@@ -51,8 +55,40 @@ SCHEMA = {
 FALLBACK_MODELS = {"claude-fable-5-1", "claude-fable-5", "claude-opus-5-5", "claude-opus-5", "claude-sonnet-5-5"}
 
 
+def backend() -> str:
+    """'claude_code' (the `claude` command, uses your Claude subscription) or 'api' (API key)."""
+    return "api" if SETTINGS.review_backend == "api" else "claude_code"
+
+
 def available() -> bool:
-    return SETTINGS.review_enabled and bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
+    if not SETTINGS.review_enabled:
+        return False
+    if backend() == "api":
+        return bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
+    return shutil.which("claude") is not None and _claude_signed_in()
+
+
+def _claude_signed_in() -> bool:
+    if os.environ.get("CLAUDE_CODE_OAUTH_TOKEN"):
+        return True
+    home = Path(os.environ.get("HOME", "~")).expanduser()
+    return (home / ".claude" / ".credentials.json").exists()
+
+
+def model_label() -> str:
+    if backend() == "api":
+        return SETTINGS.review_model
+    return f"Claude Code ({SETTINGS.claude_code_model or 'default model'})"
+
+
+def unavailable_reason() -> str:
+    if not SETTINGS.review_enabled:
+        return "Claude review is turned off in config.yaml"
+    if backend() == "api":
+        return "No ANTHROPIC_API_KEY set"
+    if shutil.which("claude") is None:
+        return "The `claude` command was not found"
+    return "Claude Code is not signed in (run `claude setup-token`, put the token in .env)"
 
 
 _client: anthropic.Anthropic | None = None
@@ -79,6 +115,82 @@ def _fmt(t: float) -> str:
 
 def classify(frames: list[tuple[float, Path]], subtitles: list[str], title: str) -> dict:
     """Return {"category", "confidence", "reason_short", "model", "error"?}."""
+    if backend() == "api":
+        return _classify_api(frames, subtitles, title)
+    return _classify_claude_code(frames, subtitles, title)
+
+
+def _classify_claude_code(frames: list[tuple[float, Path]], subtitles: list[str], title: str) -> dict:
+    """Ask the `claude` command (Claude Code, signed in with your subscription) to label the scene."""
+    work = Path(tempfile.mkdtemp(prefix="review-", dir=SETTINGS.data_dir))
+    try:
+        lines = []
+        for i, (t, path) in enumerate(frames, 1):
+            name = f"frame{i}.jpg"
+            img = Image.open(path).convert("RGB")
+            img.thumbnail((SETTINGS.frame_max_px, SETTINGS.frame_max_px))
+            img.save(work / name, "JPEG", quality=80)
+            lines.append(f"- {name} (at {_fmt(t)})")
+        sub_text = "\n".join(subtitles) if subtitles else "(no subtitles available)"
+        prompt = (
+            f"Use the Read tool to look at each of these frames in the current folder:\n" + "\n".join(lines) +
+            f"\n\nTitle: {title}\nNearby subtitles:\n{sub_text}\n\n"
+            "Then classify the segment and answer with the structured output only."
+        )
+        cmd = ["claude", "-p", prompt,
+               "--system-prompt", SYSTEM_PROMPT,
+               "--tools", "Read", "--allowedTools", "Read",
+               "--json-schema", json.dumps(SCHEMA),
+               "--output-format", "json",
+               "--no-session-persistence", "--strict-mcp-config", "--setting-sources", ""]
+        if SETTINGS.claude_code_model:
+            cmd += ["--model", SETTINGS.claude_code_model]
+        env = os.environ.copy()
+        env.pop("ANTHROPIC_API_KEY", None)  # always use the subscription sign-in, never an API key
+        home = env.get("CLAUDE_HOME") or env.get("HOME") or str(SETTINGS.data_dir / "claude-home")
+        Path(home).mkdir(parents=True, exist_ok=True)
+        env["HOME"] = home
+        try:
+            proc = subprocess.run(cmd, cwd=work, env=env, stdin=subprocess.DEVNULL, capture_output=True,
+                                  text=True, timeout=SETTINGS.claude_code_timeout)
+        except subprocess.TimeoutExpired:
+            return _unclear("Claude Code timed out")
+        try:
+            out = json.loads(proc.stdout)
+        except json.JSONDecodeError:
+            err = (proc.stderr or proc.stdout or "").strip().splitlines()
+            log.warning("Claude Code failed (exit %s): %s", proc.returncode, " | ".join(err[-3:]))
+            msg = " ".join(err[-1:])[:120] or f"exit code {proc.returncode}"
+            if re.search(r"log ?in|auth|token|credential", msg, re.I):
+                msg = "Claude Code is not signed in"
+            return _unclear(msg)
+        if out.get("is_error"):
+            reason = str(out.get("result") or out.get("subtype") or "error")[:120]
+            if re.search(r"limit|quota|usage", reason, re.I):
+                reason = "Claude usage limit reached"
+            return _unclear(reason)
+        data = out.get("structured_output")
+        if not isinstance(data, dict):
+            m = re.search(r"\{.*\}", str(out.get("result", "")), re.S)
+            try:
+                data = json.loads(m.group(0)) if m else None
+            except json.JSONDecodeError:
+                data = None
+        if not isinstance(data, dict) or data.get("category") not in ALL_CATEGORIES:
+            return _unclear("Claude declined or gave no answer")
+        data["confidence"] = max(0.0, min(1.0, float(data.get("confidence", 0))))
+        data["reason_short"] = str(data.get("reason_short", ""))[:120]
+        data["model"] = model_label()
+        usage = out.get("usage") or {}
+        data["usage"] = {"input_tokens": int(usage.get("input_tokens", 0)) + int(usage.get("cache_read_input_tokens", 0))
+                         + int(usage.get("cache_creation_input_tokens", 0)),
+                         "output_tokens": int(usage.get("output_tokens", 0))}
+        return data
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def _classify_api(frames: list[tuple[float, Path]], subtitles: list[str], title: str) -> dict:
     content: list[dict] = []
     for t, path in frames:
         content.append({"type": "text", "text": f"Frame at {_fmt(t)}"})

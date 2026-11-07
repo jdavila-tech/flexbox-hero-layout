@@ -368,7 +368,7 @@ async function init() {
     const pill = $("#review-pill");
     pill.textContent = s.review ? "Claude review on" : "Claude review off";
     pill.className = "pill " + (s.review ? "on" : "off");
-    pill.title = s.review ? `Model: ${s.model}` : "Add ANTHROPIC_API_KEY to .env. Until then every flagged scene waits for your review.";
+    pill.title = s.review ? `Using ${s.model}` : `${s.review_off_reason}. Until this is fixed, every flagged scene waits for your review.`;
     const warn = [];
     if (!s.movies_ok) warn.push(`Movies folder not found (${s.movies_dir}).`);
     if (!s.tv_ok) warn.push(`TV folder not found (${s.tv_dir}).`);
