@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skip Scanner</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">⏭</span>
+      <h1>Skip Scanner</h1>
+    </div>
+    <span id="review-pill" class="pill">…</span>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-view="movies" role="tab">Movies</button>
+    <button class="tab" data-view="tv" role="tab">TV Shows</button>
+    <button class="tab" data-view="queue" role="tab">Queue <span id="queue-count" class="count" hidden></span></button>
+  </nav>
+
+  <main>
+    <section id="view-library" class="view">
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Search titles…" autocomplete="off">
+        <select id="filter" aria-label="Filter">
+          <option value="all">All</option>
+          <option value="new">Not scanned</option>
+          <option value="review">Needs review</option>
+          <option value="skips">Has skips</option>
+          <option value="clean">Scanned, no skips</option>
+        </select>
+        <button id="refresh" class="btn ghost" title="Reload library">↻</button>
+      </div>
+      <div id="library-warning" class="notice" hidden></div>
+      <div id="library" class="library"></div>
+    </section>
+
+    <section id="view-queue" class="view" hidden>
+      <div class="toolbar">
+        <p class="muted">Titles are processed one at a time. Scanning a movie usually takes 10–30 minutes.</p>
+        <button id="clear-jobs" class="btn ghost">Clear finished</button>
+      </div>
+      <div id="jobs" class="jobs"></div>
+    </section>
+  </main>
+
+  <div id="actionbar" class="actionbar" hidden>
+    <span id="sel-count">0 selected</span>
+    <div class="actions">
+      <button id="sel-clear" class="btn ghost">Clear</button>
+      <button id="sel-scan" class="btn primary">Scan selected</button>
+    </div>
+  </div>
+
+  <dialog id="detail">
+    <div class="detail-head">
+      <div>
+        <h2 id="d-title"></h2>
+        <p id="d-sub" class="muted"></p>
+      </div>
+      <button class="btn ghost close" data-close aria-label="Close">✕</button>
+    </div>
+    <div id="d-actions" class="d-actions"></div>
+    <div id="d-body"></div>
+    <details class="manual">
+      <summary>Add a scene it missed</summary>
+      <form id="manual-form">
+        <label>Start <input name="start" placeholder="1:02:03" required></label>
+        <label>End <input name="end" placeholder="1:02:40" required></label>
+        <label class="grow">Note <input name="note" placeholder="optional"></label>
+        <button class="btn primary">Add skip</button>
+      </form>
+    </details>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

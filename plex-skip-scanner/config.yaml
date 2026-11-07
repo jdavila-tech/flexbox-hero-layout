@@ -1,0 +1,41 @@
+# Skip Scanner settings. Restart the app after changing this file.
+
+detection:
+  sample_fps: 2            # frames checked per second of video
+  scene_threshold: 0.30    # how big a picture change counts as a scene cut (0-1)
+  threshold: 0.30          # detector sensitivity: low = flags more (Claude filters the extras)
+  group_gap_sec: 4         # hits closer than this become one scene
+  min_segment_sec: 0.5
+  brighten_dark_frames: true
+  classes:                 # what the detector looks for
+    - FEMALE_BREAST_EXPOSED
+    - FEMALE_GENITALIA_EXPOSED
+    - MALE_GENITALIA_EXPOSED
+    - BUTTOCKS_EXPOSED
+    - ANUS_EXPOSED
+
+review:
+  enabled: true            # needs ANTHROPIC_API_KEY in .env
+  model: claude-opus-5-5
+  effort: low              # low is plenty for a yes/no style label and keeps cost down
+  use_fallbacks: true      # if the model declines, the API retries on another Claude model
+  frames_per_segment: 6
+  frame_max_px: 512        # frames are shrunk to this size before being sent
+  subtitle_window_sec: 30  # subtitle lines from this far around the scene are included
+
+decisions:
+  skip:                    # categories that get skipped
+    - explicit_nudity
+    - partial_nudity
+    # - sexual_activity_no_nudity
+  confidence_threshold: 0.75   # below this, the scene waits for your review
+  unreviewed_default: skip     # what happens to scenes waiting for review: skip or keep
+
+skips:
+  refine_fps: 5            # closer look at the start and end of each scene
+  snap_to_cut_sec: 3       # move skip edges to a scene cut if one is this close
+  padding_sec: 0.5
+  merge_gap_sec: 5         # skips closer than this are joined
+
+export:
+  family_suffix: Family Edit   # Plex version name: "Movie (2010) - Family Edit.mkv"

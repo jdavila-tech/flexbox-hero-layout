@@ -1,0 +1,16 @@
+services:
+  skip-scanner:
+    build: .
+    container_name: skip-scanner
+    restart: unless-stopped
+    user: "${PUID:-1000}:${PGID:-1000}"
+    env_file: .env
+    ports:
+      - "${PORT:-6091}:${PORT:-6091}"
+    volumes:
+      - "${MOVIES_PATH}:/media/movies"
+      - "${TV_PATH}:/media/tv"
+      - ./config.yaml:/config/config.yaml:ro
+      - ./data:/data
+    # Keep the scanner from slowing down Plex or the Windows 98 emulator
+    cpus: 2.0
